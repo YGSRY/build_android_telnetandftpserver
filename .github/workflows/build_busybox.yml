@@ -1,0 +1,50 @@
+name: Build BusyBox for Android 64-bit
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Android NDK
+        uses: actions/setup-android@v2
+        with:
+          ndk-version: '25.1.8937393'  # 你可以根据需要修改 NDK 版本
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git
+
+      - name: Clone BusyBox repository
+        run: |
+          git clone https://github.com/busybox/busybox.git
+          cd busybox
+          git checkout 1_36_1  # 使用官网发布的 1.36.1 稳定版
+
+      - name: Compile BusyBox for Android 64-bit
+        run: |
+          cd busybox
+          make defconfig
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android-
+
+      - name: Archive build output
+        run: |
+          cd busybox
+          mkdir -p $GITHUB_WORKSPACE/output
+          cp busybox $GITHUB_WORKSPACE/output/busybox-arm64
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: busybox-arm64
+          path: $GITHUB_WORKSPACE/output/busybox-arm64
