@@ -15,37 +15,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Android NDK
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y wget unzip
+          sudo apt install -y build-essential wget unzip git
+
+      - name: Download BusyBox 1.36.1 source code
+        run: |
+          wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2 -P /tmp
+          tar -xjf /tmp/busybox-1.36.1.tar.bz2 -C $HOME
+          cd $HOME/busybox-1.36.1
+
+      - name: Install Android NDK
+        run: |
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -P /tmp
           unzip /tmp/android-ndk-r25b-linux.zip -d $HOME
           export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
           export PATH=$ANDROID_NDK_HOME:$PATH
 
-      - name: Install dependencies
-        run: |
-          sudo apt install -y build-essential git
-
-      - name: Clone BusyBox repository
-        run: |
-          git clone https://github.com/busybox/busybox.git
-          cd busybox
-          git checkout 1_36_1  # 使用官网发布的 1.36.1 稳定版
-
       - name: Compile BusyBox for Android 64-bit
         run: |
-          cd busybox
+          cd $HOME/busybox-1.36.1
           make defconfig
           make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android-
 
       - name: Archive build output
         run: |
-          cd busybox
+          cd $HOME/busybox-1.36.1
           mkdir -p $GITHUB_WORKSPACE/output
           cp busybox $GITHUB_WORKSPACE/output/busybox-arm64
-          
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
