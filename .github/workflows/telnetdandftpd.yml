@@ -24,11 +24,12 @@ jobs:
           java-version: '11'
           distribution: 'adoptopenjdk'
 
-      # Set up Android SDK
+      # Set up Android SDK using android-actions/setup-android
       - name: Set up Android SDK
-        uses: react-native-community/setup-android@v2
+        uses: android-actions/setup-android@v2
         with:
           sdk-version: '30.0.3'
+          ndk-version: '23.1.7779620'
 
       # Install CMake, Android NDK, and other dependencies
       - name: Install required tools
