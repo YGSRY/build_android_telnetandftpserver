@@ -15,14 +15,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Android NDK
-        uses: actions/setup-android@v2
-        with:
-          ndk-version: '25.1.8937393'  # 你可以根据需要修改 NDK 版本
+      - name: Install Android NDK
+        run: |
+          sudo apt update
+          sudo apt install -y wget unzip
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -P /tmp
+          unzip /tmp/android-ndk-r25b-linux.zip -d $HOME
+          export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
+          export PATH=$ANDROID_NDK_HOME:$PATH
 
       - name: Install dependencies
         run: |
-          sudo apt update
           sudo apt install -y build-essential git
 
       - name: Clone BusyBox repository
@@ -44,7 +47,7 @@ jobs:
           cp busybox $GITHUB_WORKSPACE/output/busybox-arm64
           
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: busybox-arm64
           path: $GITHUB_WORKSPACE/output/busybox-arm64
